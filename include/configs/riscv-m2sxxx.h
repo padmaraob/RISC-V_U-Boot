@@ -119,8 +119,41 @@
  * RAM end   ---------------------------
  */
 
-#define CONFIG_ENV_IS_NOWHERE
-#define CONFIG_ENV_SIZE		0x20000  /* Total Size of Environment, 128KB */
+/*#define CONFIG_ENV_IS_NOWHERE
+#define CONFIG_ENV_SIZE		0x20000*/  /* Total Size of Environment, 128KB */
 
+#define CONFIG_SPI
+#define CONFIG_CORESPI_MICROSEMI
+#define CORESPI_BASE_ADDRESS		0x70006000
+#define CORESPI_SLAVE_SELECT		0
+#define CONFIG_SYS_SPI_BASE			CORESPI_BASE_ADDRESS
+#define CONFIG_SYS_SPI_CLK			83000000
+#define CONFIG_SF_DEFAULT_SPEED		83000000
+#define CONFIG_SF_DEFAULT_BUS		0
+#define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
+
+#define CONFIG_SPI_FLASH          1
+#define CONFIG_SPI_FLASH_STMICRO
+#define CONFIG_SPI_FLASH_BAR
+#define CONFIG_CMD_SF
+#define CONFIG_SF_DEFAULT_MODE            SPI_MODE_0
+
+
+/*
+
+* Env Storage Settings
+
+*/
+
+#define CONFIG_ENV_IS_IN_SPI_FLASH
+#if defined(CONFIG_ENV_IS_IN_SPI_FLASH)
+#define CONFIG_ENV_OFFSET          0x10000
+#define CONFIG_ENV_SIZE            0x2000
+#define CONFIG_ENV_SECT_SIZE       0x10000
+#define CONFIG_ENV_SPI_BUS		0
+#define CONFIG_ENV_SPI_CS		0
+#define CONFIG_ENV_SPI_MODE		SPI_MODE_0
+#define CONFIG_ENV_SPI_MAX_HZ	CONFIG_SF_DEFAULT_SPEED
+#endif
 
 #endif /* __CONFIG_H */

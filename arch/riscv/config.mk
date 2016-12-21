@@ -14,4 +14,11 @@ endif
 CONFIG_STANDALONE_LOAD_ADDR = 0x80100000 \
 			      -T $(srctree)/examples/standalone/riscv.lds
 
+#LDFLAGS_FINAL += --gc-sections --relax
+#PLATFORM_RELFLAGS += -ffunction-sections -fdata-sections -fno-common -ffixed-gp
 PLATFORM_CPPFLAGS	+= -D__riscv32__ -ffixed-gp -Og -g -march=RV32IM 
+#PLATFORM_RELFLAGS += -fno-strict-aliasing -fno-common -remap
+#PLATFORM_CPPFLAGS	+= -D__riscv32__ -ffixed-gp -gdwarf-2 -m32 -march=RV32IM -fpie
+
+# needed for relocation
+#LDFLAGS_u-boot += -pie

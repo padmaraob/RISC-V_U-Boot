@@ -1043,10 +1043,12 @@ int spi_flash_scan(struct spi_flash *flash)
 	for (; params->name != NULL; params++) {
 		if ((params->jedec >> 16) == idcode[0]) {
 			if ((params->jedec & 0xFFFF) == jedec) {
-				if (params->ext_jedec == 0)
+				break;
+ 				if (params->ext_jedec == 0)
 					break;
 				else if (params->ext_jedec == ext_jedec)
 					break;
+
 			}
 		}
 	}

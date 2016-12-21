@@ -31,12 +31,12 @@ SECTIONS
 
 	. = ALIGN(4);
 
-/*	.got : {
+	.got : {
 		__got_start = .;
 		 *(.got.plt) *(.got)
 		__got_end = .;
 	}
-*/
+
 	. = .;
 
 	. = ALIGN(4);

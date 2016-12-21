@@ -98,6 +98,7 @@ const struct spi_flash_params spi_flash_params_table[] = {
 	{"N25Q512A",	   0x20bb20, 0x0,       64 * 1024,  1024, RD_FULL, WR_QPP | E_FSR | SECT_4K},
 	{"N25Q1024",	   0x20ba21, 0x0,       64 * 1024,  2048, RD_FULL, WR_QPP | E_FSR | SECT_4K},
 	{"N25Q1024A",	   0x20bb21, 0x0,       64 * 1024,  2048, RD_FULL, WR_QPP | E_FSR | SECT_4K},
+	{"N25Q00A",	   	   0x20ba21, 0x0,	    64 * 1024,  2048, RD_FULL, WR_QPP | E_FSR | SECT_4K},
 #endif
 #ifdef CONFIG_SPI_FLASH_SST		/* SST */
 	{"SST25VF040B",	   0xbf258d, 0x0,	64 * 1024,     8, RD_NORM,          SECT_4K | SST_WR},
@@ -131,6 +132,7 @@ const struct spi_flash_params spi_flash_params_table[] = {
 	{"W25Q32DW",	   0xef6016, 0x0,	64 * 1024,    64, RD_FULL,	    WR_QPP | SECT_4K},
 	{"W25Q64DW",	   0xef6017, 0x0,	64 * 1024,   128, RD_FULL,	    WR_QPP | SECT_4K},
 	{"W25Q128FW",	   0xef6018, 0x0,	64 * 1024,   256, RD_FULL,	    WR_QPP | SECT_4K},
+
 #endif
 	{},	/* Empty entry to terminate the list */
 	/*
