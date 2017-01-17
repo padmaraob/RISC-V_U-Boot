@@ -3,7 +3,7 @@
  * Sysgo Real-Time Solutions, GmbH <www.elinos.com>
  * Marius Groeger <mgroeger@sysgo.de>
  *
- * Copyright (C) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+

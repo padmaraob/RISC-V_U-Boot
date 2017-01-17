@@ -3,7 +3,7 @@
  *
  * Copyright (C) 1995-2002 Russell King
  *
- * Copyright (C) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * This program is free software; you can redistribute it and/or modify

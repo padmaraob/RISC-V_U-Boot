@@ -1,8 +1,8 @@
 /*
- * Startup Code for risc-v core
+ * Startup Code for RISC-V Core
  *
- * (c) Copyright 2016 Microsemi Corporation.
- * Copyright (C) 2016 Padmarao Begari <Padmarao.Begari@microsemi.com>
+ * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Padmarao Begari <Padmarao.Begari@microsemi.com>
  *
  * SPDX-License-Identifier: GPL-2.0+
  */
@@ -13,7 +13,6 @@
 #include <asm/macro.h>
 #include <asm/encoding.h>
 
-
 #ifdef __riscv64
 # define LREG ld
 # define SREG sd
@@ -22,6 +21,7 @@
 # define LREG lw
 # define SREG sw
 # define REGBYTES 4
+# define RISCV_RELOC 3
 #endif
 
     .section      .text
@@ -89,7 +89,7 @@ call_board_init_f:
 #ifdef CONFIG_SYS_MALLOC_F_LEN
     SREG sp, GD_MALLOC_BASE(gp)  /* gd->malloc_base offset */
 #endif
-    
+
     mv  a0, zero   /* a0 <-- boot_flags = 0 */
     la t5, board_init_f
     jr t5     /* jump to board_init_f() */
@@ -115,6 +115,7 @@ stack_setup:
     
     la t0, _start
     sub t6, s4, t0  /* t6 <- relocation offset */
+
     beq t0, s4, clear_bss  /* skip relocation */
 
     mv t1, s4   /* t1 <- scratch for copy_loop */
@@ -128,7 +129,7 @@ copy_loop:
     SREG t5, 0(t1)
     addi t1, t1, 4
     blt t0, t2, copy_loop
-#ifndef PADMA
+
 fix_got:
 /*
  * Now we want to update GOT.
@@ -141,9 +142,9 @@ fix_got:
     la t3, __got_end  /* r3 <- rel __got_end in FLASH */
     add t3, t3, t6  /* r3 <- rel __got_end in RAM */
 
-    beq t2, t3, clear_bss
+    beq t2, t3, fix_rel_dyn
 
-    addi t2, t2, 8  /* skipping first two entries */
+    addi t2, t2, 12  /* skipping first three entries */
 
 fix_got_loop:
     LREG t0, 0(t2)  /* r0 <- location in FLASH to fix up */
@@ -151,7 +152,39 @@ fix_got_loop:
     SREG t0, 0(t2)  /* r0 <- store fix into .got in RAM */
     addi t2, t2 , 4
     blt t2, t3, fix_got_loop
-#endif
+
+fix_rel_dyn:
+
+    /* Update dynamic relocations */
+    la  t1, __rel_dyn_start
+    la  t2, __rel_dyn_end
+
+    beq t1, t2, clear_bss
+
+    add t1, t1, t6  /* t1 <- rel __got_start in RAM */
+    add t2, t2, t6  /* t2 <- rel __got_end in RAM */
+
+ /*   addi t1, t1, 12 */ /* skip first reserved entry: address, type, addend */
+
+    bne t1, t2, 2f
+
+1:
+    lw  t5, -8(t1)      /* t5 <-- relocation info:type */
+
+    li  t3, RISCV_RELOC
+    bne t5, t3, 2f     /* skip non-RISCV_RELOC entries */
+
+    LREG t3, -12(t1) /* t3 <-- location to fix up in FLASH:address */
+    LREG t5, -4(t1)   /* t5 <-- addend */
+
+    add t5, t5, t6
+    add t3, t3, t6          /* t3 <-- location to fix up in RAM */
+    SREG t5, 0(t3)
+
+2:
+    addi t1, t1, 12 /* each rel.dyn entry is 12 bytes */
+    blt t1, t2, 1b
+
 clear_bss:
     la t0, __bss_start /* t0 <- rel __bss_start in FLASH */
     add t0, t0, t6  /* t0 <- rel __bss_start in RAM */
@@ -182,86 +215,86 @@ call_board_init_r:
     jr t4   /* jump to board_init_r() */
     mv ra, zero
 
-/*trap entry */
+/*  trap entry */
 trap_entry:
-  addi sp, sp, -32*REGBYTES
+    addi sp, sp, -32*REGBYTES
 
-  SREG x1, 1*REGBYTES(sp)
-  SREG x2, 2*REGBYTES(sp)
-  SREG x3, 3*REGBYTES(sp)
-  SREG x4, 4*REGBYTES(sp)
-  SREG x5, 5*REGBYTES(sp)
-  SREG x6, 6*REGBYTES(sp)
-  SREG x7, 7*REGBYTES(sp)
-  SREG x8, 8*REGBYTES(sp)
-  SREG x9, 9*REGBYTES(sp)
-  SREG x10, 10*REGBYTES(sp)
-  SREG x11, 11*REGBYTES(sp)
-  SREG x12, 12*REGBYTES(sp)
-  SREG x13, 13*REGBYTES(sp)
-  SREG x14, 14*REGBYTES(sp)
-  SREG x15, 15*REGBYTES(sp)
-  SREG x16, 16*REGBYTES(sp)
-  SREG x17, 17*REGBYTES(sp)
-  SREG x18, 18*REGBYTES(sp)
-  SREG x19, 19*REGBYTES(sp)
-  SREG x20, 20*REGBYTES(sp)
-  SREG x21, 21*REGBYTES(sp)
-  SREG x22, 22*REGBYTES(sp)
-  SREG x23, 23*REGBYTES(sp)
-  SREG x24, 24*REGBYTES(sp)
-  SREG x25, 25*REGBYTES(sp)
-  SREG x26, 26*REGBYTES(sp)
-  SREG x27, 27*REGBYTES(sp)
-  SREG x28, 28*REGBYTES(sp)
-  SREG x29, 29*REGBYTES(sp)
-  SREG x30, 30*REGBYTES(sp)
-  SREG x31, 31*REGBYTES(sp)
+    SREG x1, 1*REGBYTES(sp)
+    SREG x2, 2*REGBYTES(sp)
+    SREG x3, 3*REGBYTES(sp)
+    SREG x4, 4*REGBYTES(sp)
+    SREG x5, 5*REGBYTES(sp)
+    SREG x6, 6*REGBYTES(sp)
+    SREG x7, 7*REGBYTES(sp)
+    SREG x8, 8*REGBYTES(sp)
+    SREG x9, 9*REGBYTES(sp)
+    SREG x10, 10*REGBYTES(sp)
+    SREG x11, 11*REGBYTES(sp)
+    SREG x12, 12*REGBYTES(sp)
+    SREG x13, 13*REGBYTES(sp)
+    SREG x14, 14*REGBYTES(sp)
+    SREG x15, 15*REGBYTES(sp)
+    SREG x16, 16*REGBYTES(sp)
+    SREG x17, 17*REGBYTES(sp)
+    SREG x18, 18*REGBYTES(sp)
+    SREG x19, 19*REGBYTES(sp)
+    SREG x20, 20*REGBYTES(sp)
+    SREG x21, 21*REGBYTES(sp)
+    SREG x22, 22*REGBYTES(sp)
+    SREG x23, 23*REGBYTES(sp)
+    SREG x24, 24*REGBYTES(sp)
+    SREG x25, 25*REGBYTES(sp)
+    SREG x26, 26*REGBYTES(sp)
+    SREG x27, 27*REGBYTES(sp)
+    SREG x28, 28*REGBYTES(sp)
+    SREG x29, 29*REGBYTES(sp)
+    SREG x30, 30*REGBYTES(sp)
+    SREG x31, 31*REGBYTES(sp)
 
-  csrr a0, mcause
-  csrr a1, mepc
-  mv a2, sp
-  jal handle_trap
-  csrw mepc, a0
+    csrr a0, mcause
+    csrr a1, mepc
+    mv a2, sp
+    jal handle_trap
+    csrw mepc, a0
 
-  # Remain in M-mode after mret
-  li t0, MSTATUS_MPP
-  csrs mstatus, t0
+    /* Remain in M-mode after mret */
+    li t0, MSTATUS_MPP
+    csrs mstatus, t0
 
-  LREG x1, 1*REGBYTES(sp)
-  LREG x2, 2*REGBYTES(sp)
-  LREG x3, 3*REGBYTES(sp)
-  LREG x4, 4*REGBYTES(sp)
-  LREG x5, 5*REGBYTES(sp)
-  LREG x6, 6*REGBYTES(sp)
-  LREG x7, 7*REGBYTES(sp)
-  LREG x8, 8*REGBYTES(sp)
-  LREG x9, 9*REGBYTES(sp)
-  LREG x10, 10*REGBYTES(sp)
-  LREG x11, 11*REGBYTES(sp)
-  LREG x12, 12*REGBYTES(sp)
-  LREG x13, 13*REGBYTES(sp)
-  LREG x14, 14*REGBYTES(sp)
-  LREG x15, 15*REGBYTES(sp)
-  LREG x16, 16*REGBYTES(sp)
-  LREG x17, 17*REGBYTES(sp)
-  LREG x18, 18*REGBYTES(sp)
-  LREG x19, 19*REGBYTES(sp)
-  LREG x20, 20*REGBYTES(sp)
-  LREG x21, 21*REGBYTES(sp)
-  LREG x22, 22*REGBYTES(sp)
-  LREG x23, 23*REGBYTES(sp)
-  LREG x24, 24*REGBYTES(sp)
-  LREG x25, 25*REGBYTES(sp)
-  LREG x26, 26*REGBYTES(sp)
-  LREG x27, 27*REGBYTES(sp)
-  LREG x28, 28*REGBYTES(sp)
-  LREG x29, 29*REGBYTES(sp)
-  LREG x30, 30*REGBYTES(sp)
-  LREG x31, 31*REGBYTES(sp)
+    LREG x1, 1*REGBYTES(sp)
+    LREG x2, 2*REGBYTES(sp)
+    LREG x3, 3*REGBYTES(sp)
+    LREG x4, 4*REGBYTES(sp)
+    LREG x5, 5*REGBYTES(sp)
+    LREG x6, 6*REGBYTES(sp)
+    LREG x7, 7*REGBYTES(sp)
+    LREG x8, 8*REGBYTES(sp)
+    LREG x9, 9*REGBYTES(sp)
+    LREG x10, 10*REGBYTES(sp)
+    LREG x11, 11*REGBYTES(sp)
+    LREG x12, 12*REGBYTES(sp)
+    LREG x13, 13*REGBYTES(sp)
+    LREG x14, 14*REGBYTES(sp)
+    LREG x15, 15*REGBYTES(sp)
+    LREG x16, 16*REGBYTES(sp)
+    LREG x17, 17*REGBYTES(sp)
+    LREG x18, 18*REGBYTES(sp)
+    LREG x19, 19*REGBYTES(sp)
+    LREG x20, 20*REGBYTES(sp)
+    LREG x21, 21*REGBYTES(sp)
+    LREG x22, 22*REGBYTES(sp)
+    LREG x23, 23*REGBYTES(sp)
+    LREG x24, 24*REGBYTES(sp)
+    LREG x25, 25*REGBYTES(sp)
+    LREG x26, 26*REGBYTES(sp)
+    LREG x27, 27*REGBYTES(sp)
+    LREG x28, 28*REGBYTES(sp)
+    LREG x29, 29*REGBYTES(sp)
+    LREG x30, 30*REGBYTES(sp)
+    LREG x31, 31*REGBYTES(sp)
 
-  addi sp, sp, 32*REGBYTES
-  mret
+    addi sp, sp, 32*REGBYTES
+    mret
 
 #ifdef CONFIG_INIT_CRITICAL
 cpu_init_crit:
@@ -272,4 +305,3 @@ cpu_init_crit:
 lowlevel_init:
     ret
 #endif
-

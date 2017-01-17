@@ -1,7 +1,7 @@
 /*
  * Microsemi CoreSPI interface (SPI mode)
  *
- * (C) Copyright 2016  Microsemi corporation
+ * Copyright (c ) 2016  Microsemi corporation
  * Written-by: Padmarao Begari <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:     GPL-2.0+
@@ -65,7 +65,7 @@ static inline struct corespi_slave *to_corespi_slave(
 /* spi_init is called during boot when CONFIG_CMD_SPI is defined */
 void spi_init(void)
 {
-    /*
+   /*
     * configuration will be done in spi_setup_slave()
     */
 }
@@ -164,7 +164,6 @@ int spi_xfer(struct spi_slave *slave, unsigned int bitlen,
     if(din == NULL)
     {
     	/*  write */
-       /*  corespi_transfer_block(slave, dout, bytelen, din, 0); */
     	for(u8 i = 0; i < bytelen; i++)
     		backup_data[i] = txp[i];
         backup_len = bytelen;
@@ -173,8 +172,6 @@ int spi_xfer(struct spi_slave *slave, unsigned int bitlen,
     {
     	/* read */
         corespi_transfer_block(slave, backup_data, backup_len, rxp, bytelen);
-       /*  corespi_transfer_block(slave, txp, 0, rxp, bytelen); */
-
     }
 
     
@@ -262,14 +259,13 @@ static void corespi_transfer_block
     u16 tx_idx = 0;          /* Number of valid data bytes sent */
     u16 rx_idx = 0;          /* Number of valid response bytes received */
     u16 transit = 0;         /* Number of bytes "in flight" to avoid FIFO errors */
-    u8 data;
     u8 p_reg;
 
-            /*
-             * tansfer_size is one less than the real amount as we have to write
-             * the last frame separately to trigger the slave deselect in case
-             * the SPS option is in place.
-             */
+    /*
+     * tansfer_size is one less than the real amount as we have to write
+     * the last frame separately to trigger the slave deselect in case
+     * the SPS option is in place.
+     */
     transfer_size = ((u32)cmd_byte_size + (u32)rx_byte_size) - 1;
             /* Flush the receive and transmit FIFOs */
     writeb(CMD_RXFIFORST_MASK | CMD_TXFIFORST_MASK, &cspi->regs->command);
@@ -297,7 +293,7 @@ static void corespi_transfer_block
 	    ++tx_idx;
 	}
 
-	        /* If room left to put last frame in before the off, then do it */
+	/* If room left to put last frame in before the off, then do it */
 	if((tx_idx == transfer_size) && (tx_idx < 32))
 	{
 		if( tx_idx < cmd_byte_size )
@@ -319,19 +315,20 @@ static void corespi_transfer_block
     p_reg |= 0x01;
     writeb(p_reg, &cspi->regs->crtl1);
 
-            /* Perform the remainder of the transfer by sending a byte every time a byte
-             * has been received. This should ensure that no Rx overflow can happen in
-             * case of an interrupt occurring during this function.
-		     *
-		     * We break the transfer down into stages to minimise the processing in
-		     * each loop as the SPI interface is very demanding at higher clock rates.
-		     * This works well with FIFOs but might be less efficient if there is only
-		     * a single frame buffer.
-		     *
-		     * First stage transfers remaining command bytes (if any).
-		     * At this stage anything in the RX FIFO can be discarded as it is
-		     * not part of a valid response.
-		     */
+    /* Perform the remainder of the transfer by sending a byte every time a byte
+     * has been received. This should ensure that no Rx overflow can happen in
+     * case of an interrupt occurring during this function.
+     *
+     * We break the transfer down into stages to minimise the processing in
+     * each loop as the SPI interface is very demanding at higher clock rates.
+     * This works well with FIFOs but might be less efficient if there is only
+     * a single frame buffer.
+     *
+     * First stage transfers remaining command bytes (if any).
+     * At this stage anything in the RX FIFO can be discarded as it is
+     * not part of a valid response.
+     */
+
     while( tx_idx < cmd_byte_size )
 	{
     	if( transit < 32 )
@@ -350,17 +347,17 @@ static void corespi_transfer_block
 		}
     	if(!((readb(&cspi->regs->stat) >> 0x2) & 0x1))
 		{
-		            /* Read and discard. */
-    		data = readl(&cspi->regs->rxdata);
+		     /* Read and discard. */
+    		readl(&cspi->regs->rxdata);
 		   	++transfer_idx;
 		    --transit;
 		}
     }
-		    /*
-		     * Now, we are writing dummy bytes to push through the response from
-		     * the slave but we still have to keep discarding any read data that
-		     * corresponds with one of our command bytes.
-		     */
+    /*
+     * Now, we are writing dummy bytes to push through the response from
+     * the slave but we still have to keep discarding any read data that
+     * corresponds with one of our command bytes.
+     */
     while( transfer_idx < cmd_byte_size )
 	{
     	if( transit < 32 )
@@ -374,16 +371,16 @@ static void corespi_transfer_block
 		}
     	if(!((readb(&cspi->regs->stat) >> 0x2) & 0x1))
 		{
-		            /* Read and discard. */
-    		data = readl(&cspi->regs->rxdata);
+		    /* Read and discard. */
+    		readl(&cspi->regs->rxdata);
 		   	++transfer_idx;
 		    --transit;
 		}
     }
-		    /*
-		     * Now we are now only sending dummy data to push through the
-		     * valid response data which we store in the response buffer.
-		     */
+    /*
+     * Now we are now only sending dummy data to push through the
+     * valid response data which we store in the response buffer.
+     */
     while( tx_idx < transfer_size )
 	{
     	if( transit < 32 )
@@ -394,14 +391,14 @@ static void corespi_transfer_block
 		}
     	if(!((readb(&cspi->regs->stat) >> 0x2) & 0x1))
 		{
-		            /* Process received byte. */
+		    /* Process received byte. */
 			rx_buffer[rx_idx] = (u8)readl(&cspi->regs->rxdata);
 			++rx_idx;
 		    ++transfer_idx;
 		    --transit;
 		}
     }
-		    /* If we still need to send the last frame */
+    /* If we still need to send the last frame */
 	while( tx_idx == transfer_size )
 	{
 		if( transit < 32 )
@@ -412,22 +409,23 @@ static void corespi_transfer_block
 		}
 		if(!((readb(&cspi->regs->stat) >> 0x2) & 0x1))
 		{
-		            /* Process received byte. */
+		    /* Process received byte. */
 			rx_buffer[rx_idx] = (u8)readl(&cspi->regs->rxdata);
 			++rx_idx;
 		    ++transfer_idx;
 		    --transit;
 		}
 	}
-		    /*
-		     * Finally, we are now finished sending data and are only reading
-		     * valid response data which we store in the response buffer.
-		     */
-	while( transfer_idx <= transfer_size )
+
+    /*
+     * Finally, we are now finished sending data and are only reading
+     * valid response data which we store in the response buffer.
+     */
+    while( transfer_idx <= transfer_size )
 	{
 		if(!((readb(&cspi->regs->stat) >> 0x2) & 0x1))
 	    {
-	            /* Process received byte. */
+	        /* Process received byte. */
 			rx_buffer[rx_idx] = (u8)readl(&cspi->regs->rxdata);
 			++rx_idx;
 	        ++transfer_idx;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
@@ -8,7 +8,7 @@
 #include <common.h>
 #include <asm/io.h>
 
-/* CoreUART register footprint */
+/* CoreTimer register footprint */
 typedef struct msc_coretimer {
 	uint timer_load;
 	uint timer_value;
@@ -34,14 +34,12 @@ int timer_init(void)
 	/* disable timer and interrupts */
 	writel(0, &tmr->timer_ctrl);
 
-
 	/* setup timer */
 	/* prescale = 83mhz/2 => 41.5Mhz */
 	writel(0, &tmr->timer_prescale); 
 	writel(TIMER_LOAD_VAL, &tmr->timer_load);
 	/* clear interrupts */
 	writel(0, &tmr->timer_intclr);
-
 
 	cr = readl(&tmr->timer_ctrl);
 	cr |= CORETIMER_ENABLE;
@@ -53,22 +51,18 @@ int timer_init(void)
 	return 0;
 }
 
-/*
- * timer without interrupts
- */
+/* timer without interrupts  */
 
-/*
- * reset time
- */
+/* reset time */
 void reset_timer_masked(void)
 {
 	msc_coretimer_t *tmr = (msc_coretimer_t *)CONFIG_CORETIMER_BASE;
 
-	/* capure current decrementer value time */
-
+	/* capture current decrement value time */
 	lastdec = readl(&tmr->timer_value) /
 			(CONFIG_SYS_CLK_FREQ / 4 / CONFIG_SYS_HZ);
-	timestamp = 0;		/* start "advancing" time stamp from 0 */
+	/* start "advancing" time stamp from 0 */
+	timestamp = 0;
 
 	debug("%s(): lastdec = %lx\n", __func__, lastdec);
 }
@@ -87,19 +81,20 @@ ulong get_timer_masked(void)
 	msc_coretimer_t *tmr = (msc_coretimer_t *)CONFIG_CORETIMER_BASE;
 
 	/* current tick value */
-
 	ulong now = readl(&tmr->timer_value) /
 			(CONFIG_SYS_CLK_FREQ / 4 / CONFIG_SYS_HZ);
-
 	debug("%s(): now = %lx, lastdec = %lx\n", __func__, now, lastdec);
 
-	if (lastdec >= now) {
+	if (lastdec >= now)
+	{
 		/*
 		 * normal mode (non roll)
 		 * move stamp fordward with absoulte diff ticks
 		 */
 		timestamp += lastdec - now;
-	} else {
+	}
+	else
+	{
 		/*
 		 * we have overflow of the count down timer
 		 *
@@ -139,13 +134,13 @@ void __udelay(unsigned long usec)
 {
 	msc_coretimer_t *tmr = (msc_coretimer_t *)CONFIG_CORETIMER_BASE;
 
-
 	long tmo = usec * ((CONFIG_SYS_CLK_FREQ / 4) / 1000) / 1000;
 
 	unsigned long now, last = readl(&tmr->timer_value);
 
 	debug("%s(%lu)\n", __func__, usec);
-	while (tmo > 0) {
+	while (tmo > 0)
+	{
 		now = readl(&tmr->timer_value);
 		if (now > last) /* count down timer overflow */
 			tmo -= TIMER_LOAD_VAL + last - now;
@@ -157,7 +152,7 @@ void __udelay(unsigned long usec)
 
 /*
  * This function is derived from PowerPC code (read timebase as long long).
- * On ARM it just returns the timer value.
+ * On RISCV it just returns the timer value.
  */
 unsigned long long get_ticks(void)
 {
@@ -166,7 +161,7 @@ unsigned long long get_ticks(void)
 
 /*
  * This function is derived from PowerPC code (timebase clock frequency).
- * On ARM it returns the number of timer ticks per second.
+ * On RISCV it returns the number of timer ticks per second.
  */
 ulong get_tbclk(void)
 {

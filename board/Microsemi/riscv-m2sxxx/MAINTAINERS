@@ -1,6 +1,0 @@
-RISCV-M2SXXX BOARD
-M:	Padmarao <padmarao.begari@microsemi.com>
-S:	Maintained
-F:	board/Microsemi/riscv-m2sxxx/
-F:	include/configs/riscv-m2sxxx.h
-F:	configs/riscv-m2sxxx_defconfig

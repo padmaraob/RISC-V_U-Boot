@@ -1,21 +1,16 @@
 /*
- * (c) Copyright 2016 Microsemi Corporation.
- 
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
-/* OUTPUT_FORMAT("elf32-riscv32", "elf32-riscv32", "elf32-riscv32") */
+OUTPUT_FORMAT("elf32-littleriscv", "elf32-littleriscv", "elf32-littleriscv")
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
-STACK_SIZE = 128k;
-HEAP_SIZE = 128k;
-
 SECTIONS
 {
-    . = 0x80000000;
 	. = ALIGN(4);
 	.text :
 	{
@@ -32,26 +27,31 @@ SECTIONS
 	. = ALIGN(4);
 
 	.got : {
-		__got_start = .;
-		 *(.got.plt) *(.got)
-		__got_end = .;
-	}
-
-	. = .;
+	   __got_start = .;
+	   *(.got.plt) *(.got)
+	   __got_end = .;
+    }
 
 	. = ALIGN(4);
 	.u_boot_list : {
 		KEEP(*(SORT(.u_boot_list*)));
 	}
-
-	. = ALIGN(4);
-
+	
+    . = ALIGN(4);
+    	
+    /DISCARD/ : { *(.rela.plt*) }
+    .rela.dyn : {
+        __rel_dyn_start = .;
+        *(.rela*)
+        __rel_dyn_end = .;
+    }
+    
 	_end = .;
 
 	.bss : {
-		__bss_start = .;
-		*(.bss)
-		 . = ALIGN(4);
+        __bss_start = .;
+        *(.bss)
+		. = ALIGN(4);
 		__bss_end = .;
 	}
 

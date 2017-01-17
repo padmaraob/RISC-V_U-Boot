@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * This file is subject to the terms and conditions of the GNU General Public

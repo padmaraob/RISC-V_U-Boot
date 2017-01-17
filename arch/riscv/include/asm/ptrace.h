@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2016 Microsemi Corporation.
- * Copyright (C) 2016 Padmarao Begari <Padmarao.Begari@microsemi.com>
+ * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Padmarao Begari <Padmarao.Begari@microsemi.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

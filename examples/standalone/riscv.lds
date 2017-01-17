@@ -4,9 +4,8 @@
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
-/* OUTPUT_FORMAT("elf32-riscv32", "elf32-riscv32", "elf32-riscv32") */
+OUTPUT_FORMAT("elf32-littleriscv", "elf32-littleriscv", "elf32-littleriscv")
 OUTPUT_ARCH(riscv)
-ENTRY(_start)
 SECTIONS
 {
 	. = ALIGN(4);

@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2016 Microsemi Corporation
+ * Microsemi CoreUARTabp
  *
- * Modified to support C structur SoC access by
- * Padmarao Begari <padmarao.begari@microsemi.com>
+ * Copyright (c) 2016 Microsemi Corporation
+ * Written-by: Padmarao Begari <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier: GPL-2.0+
  */
@@ -64,7 +64,6 @@ static void msc_serial_activate(msc_coreuart_t *usart)
 {
     u32 value;
     u32 rx_full;
-    u8 rx_byte;
     
     value = readb(&usart->ctrl2) | (DATA_8_BITS | NO_PARITY);
     writeb(value, &usart->ctrl2);
@@ -73,7 +72,7 @@ static void msc_serial_activate(msc_coreuart_t *usart)
     
     while (rx_full)
     {
-            rx_byte = readb(&usart->rxdata);
+            readb(&usart->rxdata);
             rx_full = readb(&usart->status) & STATUS_RXFULL_MASK;
     }
 }

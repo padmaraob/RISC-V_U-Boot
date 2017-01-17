@@ -3,7 +3,7 @@
  * Sysgo Real-Time Solutions, GmbH <www.elinos.com>
  * Marius Groeger <mgroeger@sysgo.de>
  *
- * Copyright (C) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
@@ -19,7 +19,7 @@ int	cleanup_before_linux(void);
 /* board/.../... */
 int	board_init(void);
 
-/* cpu/.../interrupt.c */
-void	reset_timer_masked(void);
+/* cpu/.../timer.c */
+void reset_timer_masked(void);
 
 #endif	/* _U_BOOT_RISCV_H_ */

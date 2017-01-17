@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Microsemi Corporation.
+ * Copyright (c) 2016 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier: GPL-2.0+
@@ -8,14 +8,10 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-
 /*
  * CPU and Board Configuration Options
  */
 #define CONFIG_RISCV_M2SXXX
-
-#define CONFIG_USE_INTERRUPT
-
 #define CONFIG_SKIP_LOWLEVEL_INIT
 
 /*
@@ -26,7 +22,7 @@
 #define CONFIG_SETUP_MEMORY_TAGS    /* send memory definition to kernel */
 #define CONFIG_INITRD_TAG           /* send initrd params */
 
-/* #define CONFIG_NEEDS_MANUAL_RELOC */
+#define CONFIG_NEEDS_MANUAL_RELOC
 
 #define CONFIG_SYS_TEXT_BASE    0x80000000 /* SDRAM  */
 
@@ -95,9 +91,9 @@
  * Load address and memory test area should agree with
  * arch/riscv/config.mk. Be careful not to overwrite U-Boot itself.
  */
-#define CONFIG_SYS_LOAD_ADDR 0x80100000 /* SDRAM */
+#define CONFIG_SYS_LOAD_ADDR 0x80000000 /* SDRAM */
 
-#define CONFIG_LOADADDR			0x80100000
+#define CONFIG_LOADADDR			0x80000000
 
 /* memtest works on 512 MB in DRAM */
 #define CONFIG_SYS_MEMTEST_START PHYS_SDRAM_0
@@ -119,8 +115,8 @@
  * RAM end   ---------------------------
  */
 
-/*#define CONFIG_ENV_IS_NOWHERE
-#define CONFIG_ENV_SIZE		0x20000*/  /* Total Size of Environment, 128KB */
+#define CONFIG_ENV_IS_NOWHERE
+#define CONFIG_ENV_SIZE		0x20000  /* Total Size of Environment, 128KB */
 
 #define CONFIG_SPI
 #define CONFIG_CORESPI_MICROSEMI
@@ -138,14 +134,10 @@
 #define CONFIG_CMD_SF
 #define CONFIG_SF_DEFAULT_MODE            SPI_MODE_0
 
-
 /*
-
-* Env Storage Settings
-
-*/
-
-#define CONFIG_ENV_IS_IN_SPI_FLASH
+ * Env Storage Settings
+ */
+/*#define CONFIG_ENV_IS_IN_SPI_FLASH
 #if defined(CONFIG_ENV_IS_IN_SPI_FLASH)
 #define CONFIG_ENV_OFFSET          0x10000
 #define CONFIG_ENV_SIZE            0x2000
@@ -154,6 +146,6 @@
 #define CONFIG_ENV_SPI_CS		0
 #define CONFIG_ENV_SPI_MODE		SPI_MODE_0
 #define CONFIG_ENV_SPI_MAX_HZ	CONFIG_SF_DEFAULT_SPEED
-#endif
+#endif*/
 
 #endif /* __CONFIG_H */

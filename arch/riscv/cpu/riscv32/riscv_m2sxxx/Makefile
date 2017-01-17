@@ -8,6 +8,6 @@
 obj-y	:= cache.o cpu.o timer.o interrupts.o
 
 ifndef CONFIG_SKIP_LOWLEVEL_INIT
-obj-y	+= lowlevel_init.o
+#obj-y	+= lowlevel_init.o
 endif
 

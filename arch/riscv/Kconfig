@@ -13,6 +13,6 @@ config TARGET_RISCV_M2SXXX
 
 endchoice
 
-source "board/Microsemi/riscv-m2sxxx/Kconfig"
+source "board/microsemi/riscv-m2sxxx/Kconfig"
 
 endmenu
