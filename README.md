@@ -18,7 +18,7 @@ After clone of freedom-e-sdk, edit the `make` file for `riscv32-unknown-linux-gn
 
 ### Getting U-Boot sources
 
-        $ git clone https://github.com/RISCV-on-Microsemi-FPGA/RISC-V_U-Boot
+        $ git clone https://github.com/Microsemi-SoC-IP/RISC-V_U-Boot
         $ cd RISC-V_U-Boot
     
 ### Build U-Boot
@@ -41,6 +41,6 @@ After clone of freedom-e-sdk, edit the `make` file for `riscv32-unknown-linux-gn
 
 ### Build and Debug U-Boot with Softconsole
 
-The Softconsole avialable on [RISCV-on-Microsemi-FPGA](https://github.com/RISCV-on-Microsemi-FPGA/SoftConsole).
+The Softconsole available on [RISCV-on-Microsemi-FPGA](https://github.com/RISCV-on-Microsemi-FPGA/SoftConsole).
 
 Follow the steps explained in `Debug_setup_with_SC.docx` document available in u-boot root directory.
