@@ -3,7 +3,7 @@
  * Various bits and pieces copyrights include:
  * Linus Torvalds (test_bit).
  *
- * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2017 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * bit 0 is the LSB of addr; bit 32 is the LSB of (addr+1).

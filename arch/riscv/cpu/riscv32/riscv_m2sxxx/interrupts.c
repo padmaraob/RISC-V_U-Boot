@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2016-17 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
@@ -43,6 +43,7 @@ int interrupt_init(void)
 /* enable interrupts */
 void enable_interrupts(void)
 {
+
 }
 
 /*
@@ -72,7 +73,7 @@ uint handle_trap(uint mcause, uint epc)
   }
   else
   {
-	  _exit_trap(1 + mcause);
+	  _exit_trap(mcause);
   }
   return epc;
 }
@@ -90,5 +91,4 @@ __attribute__((weak)) void timer_interrupt(struct pt_regs * regs)
 static void _exit_trap(int code)
 {
 	fprintf(stderr, "*** Progam has exited with code: %d***\n", code);
-	while (1);
 }

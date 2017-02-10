@@ -322,8 +322,8 @@ void serial_stdio_init(void)
 
 		stdio_register(&dev);
 
-		/* s = s->next; padma*/
-		 s = 0;
+		s = s->next;
+		/*s = 0;*/
 	}
 }
 

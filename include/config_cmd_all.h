@@ -9,6 +9,7 @@
 #ifndef _CONFIG_CMD_ALL_H
 #define _CONFIG_CMD_ALL_H
 
+#ifndef PADM
 /*
  * Alphabetical list of all possible commands.
  */
@@ -53,5 +54,5 @@
 #define CONFIG_CMD_UNIVERSE	/* Tundra Universe Support	*/
 #define CONFIG_CMD_UNZIP	/* unzip from memory to memory	*/
 #define CONFIG_CMD_ZFS		/* ZFS Support			*/
-
+#endif
 #endif	/* _CONFIG_CMD_ALL_H */

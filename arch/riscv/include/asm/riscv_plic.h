@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2016 Microsemi Corporation.
- * Copyright (c) 2016 Padmarao Begari <Padmarao.Begari@microsemi.com>
+ * Copyright (c) 2017 Microsemi Corporation.
+ * Copyright (c) 2017 Padmarao Begari <Padmarao.Begari@microsemi.com>
  */
 #ifndef RISCV_PLIC_H
 #define RISCV_PLIC_H

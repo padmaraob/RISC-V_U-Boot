@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2016-17 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
@@ -28,7 +28,7 @@ int cleanup_before_linux(void)
 int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	disable_interrupts();
-	fprintf(stderr, "*** reset failed---(not implemented ***\n");
+	fprintf(stderr, "*** reset failed---(not implemented) ***\n");
 	/* Code the jump to reset(_start) here  */
 	/*__asm__("la t0, _start;  \
 		 jr t0");*/

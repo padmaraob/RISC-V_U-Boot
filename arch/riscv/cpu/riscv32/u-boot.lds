@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2017 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
@@ -33,6 +33,7 @@ SECTIONS
     }
 
 	. = ALIGN(4);
+
 	.u_boot_list : {
 		KEEP(*(SORT(.u_boot_list*)));
 	}
@@ -46,8 +47,18 @@ SECTIONS
         __rel_dyn_end = .;
     }
     
+    . = ALIGN(4);
+        
+    .dynsym : {
+        __dyn_sym_start = .;
+        *(.dynsym)
+        __dyn_sym_end = .;
+    }
+    
+    . = ALIGN(4);
+    
 	_end = .;
-
+	
 	.bss : {
         __bss_start = .;
         *(.bss)

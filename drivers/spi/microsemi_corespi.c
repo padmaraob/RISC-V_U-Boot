@@ -1,7 +1,7 @@
 /*
  * Microsemi CoreSPI interface (SPI mode)
  *
- * Copyright (c ) 2016  Microsemi corporation
+ * Copyright (c ) 2017  Microsemi corporation
  * Written-by: Padmarao Begari <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:     GPL-2.0+
@@ -13,13 +13,21 @@
 #include <malloc.h>
 #include <spi.h>
 
-#define CTRL1_ENABLE_MASK           0x01u
-#define CTRL1_MASTER_MASK           0x02u
+/* Default fifo depth */
+#ifndef CONFIG_CORESPI_FIFO_DEPTH
+#define CONFIG_CORESPI_FIFO_DEPTH	32
+#endif
 
-#define CMD_RXFIFORST_MASK          0x01u
-#define CMD_TXFIFORST_MASK          0x02u
+#define CTRL1_ENABLE_MASK           0x01
+#define CTRL1_MASTER_MASK           0x02
+
+#define CMD_RXFIFORST_MASK          0x01
+#define CMD_TXFIFORST_MASK          0x02
 
 #define STATUS_RXOVFLOW_SHIFT       0x04
+
+/* tx/rx fifo depth */
+#define FIFO_DEPTH					CONFIG_CORESPI_FIFO_DEPTH
 /* For clearing all active interrupts */
 #define SPI_ALL_INTS                0xFF
  
@@ -43,21 +51,16 @@ struct corespi_slave {
     struct spi_slave slave;
     struct corespi_regs *regs;
 };
-static u8 backup_data[128];
-static u8 backup_len;
+
+static u8 backup_data[264];
+static u16 backup_len = 0;
+static u8 backup_din = 0;
 
 static void recover_from_rx_overflow(struct corespi_slave *as);
-static void wait_ready(struct spi_slave *slave);
-static void corespi_transfer_block
-(
-	struct spi_slave *slave,
-    const u8 * cmd_buffer,
-    u16 cmd_byte_size,
-    u8 * rx_buffer,
-    u16 rx_byte_size
-);
-static inline struct corespi_slave *to_corespi_slave(
-    struct spi_slave *slave)
+static void corespi_transfer_block(struct spi_slave *slave,
+	   const u8 *cmd_buffer,u16 cmd_byte_size, u8 *rx_buffer, u16 rx_byte_size);
+
+static inline struct corespi_slave *to_corespi_slave(struct spi_slave *slave)
 {
     return container_of(slave, struct corespi_slave, slave);
 }
@@ -69,15 +72,13 @@ void spi_init(void)
     * configuration will be done in spi_setup_slave()
     */
 }
-/* the following is called in sequence by do_spi_xfer() */
 
+/* the following is called in sequence by do_spi_xfer() */
 struct spi_slave *spi_setup_slave(uint bus, uint cs, uint max_hz, uint mode)
 {
     struct corespi_slave *cslave;
-    u8 command;
-    u8 din[1];
-    /* we only set up CoreSPI for now, so ignore bus */
 
+    /* we only set up CoreSPI for now, so ignore bus */
     if (mode & SPI_3WIRE) {
         error("3-wire mode not supported");
         return NULL;
@@ -98,6 +99,7 @@ struct spi_slave *spi_setup_slave(uint bus, uint cs, uint max_hz, uint mode)
         printf("SPI_error: Fail to allocate corespi_slave\n");
         return NULL;
     }
+/*    cslave->slave.mode_rx = SPI_RX_SLOW; */
 
     cslave->regs = (struct corespi_regs *)CORESPI_BASE_ADDRESS;
 
@@ -111,18 +113,10 @@ struct spi_slave *spi_setup_slave(uint bus, uint cs, uint max_hz, uint mode)
     writeb(0, &cslave->regs->crtl2);
     /* Enable the CoreSPI in master mode with TXUNDERRUN, RXOVFLOW and TXDONE interrupts disabled */
     writeb(CTRL1_ENABLE_MASK | CTRL1_MASTER_MASK, &cslave->regs->crtl1);
-#ifdef CONFIG_SPI_FLASH_STMICRO
-    writeb(0x1, &cslave->regs->ssel);
-    command = 0x66;
-    corespi_transfer_block(&cslave->slave, &command, 1, din, 0);
-    command = 0x99;
-    corespi_transfer_block(&cslave->slave, &command, 1, din, 0);
-	wait_ready(&cslave->slave);
-
-#endif
+    /* Set the correct slave select bit */
+    writeb((1 << CORESPI_SLAVE_SELECT), &cslave->regs->ssel);
     return &cslave->slave;
 }
-
 void spi_free_slave(struct spi_slave *slave)
 {
     struct corespi_slave *cslave = to_corespi_slave(slave);
@@ -134,15 +128,15 @@ void spi_free_slave(struct spi_slave *slave)
 int spi_xfer(struct spi_slave *slave, unsigned int bitlen,
     const void *dout, void *din, unsigned long flags)
 {
- /*   struct corespi_slave *cslave = to_corespi_slave(slave);*/
+/*    struct corespi_slave *cslave = to_corespi_slave(slave); */
     unsigned int bytelen = bitlen >> 3;
     const u8 *txp = dout;
     u8 *rxp = din;
+
     
     if (bitlen == 0)
         /* Finish any previously submitted transfers */
         goto out;
-
     /*
      * TODO: The controller can do non-multiple-of-8 bit
      * transfers, but this driver currently doesn't support it.
@@ -157,29 +151,48 @@ int spi_xfer(struct spi_slave *slave, unsigned int bitlen,
         goto out;
     }
 
-    if (flags & SPI_XFER_BEGIN)
-    {
-        spi_cs_activate(slave);
-    }
     if(din == NULL)
     {
-    	/*  write */
-    	for(u8 i = 0; i < bytelen; i++)
-    		backup_data[i] = txp[i];
-        backup_len = bytelen;
+
+        if (flags & SPI_XFER_END)
+        {
+        	/* write data in spi flash */
+        	if(backup_din == 1)
+        	{
+            	for(u8 i = 0; i < bytelen; i++)
+            	{
+            		backup_data[backup_len + i] = txp[i];
+            	}
+                backup_len += bytelen;
+                corespi_transfer_block(slave, backup_data, backup_len, rxp, 0);
+                backup_din = 0;
+        	}
+        	else /* write command */
+        	{
+        		backup_din = 0;
+        		corespi_transfer_block(slave, txp, bytelen, rxp, 0);
+        	}
+        }
+        else
+        {
+        	/* write or read command backup */
+        	for(u8 i = 0; i < bytelen; i++)
+        	{
+        		backup_data[i] = txp[i];
+        	}
+            backup_len = bytelen;
+            backup_din = 1;
+        }
+
     }
     else if(dout == NULL)
     {
+    	backup_din = 0;
     	/* read */
         corespi_transfer_block(slave, backup_data, backup_len, rxp, bytelen);
     }
-
     
 out:
-    if (flags & SPI_XFER_END)
-    {
-        spi_cs_deactivate(slave);
-    }
     return 0;
 }
 int spi_claim_bus(struct spi_slave *slave)
@@ -234,24 +247,10 @@ static void recover_from_rx_overflow(struct corespi_slave *as)
         writeb(CTRL1_ENABLE_MASK | CTRL1_MASTER_MASK, &as->regs->crtl1);
     }
 }
-static void wait_ready(struct spi_slave *slave)
-{
-    u8 ready_bit;
-    u8 command = 0x05; /* READ_STATUS */
 
-    do {
-    	corespi_transfer_block(slave, &command, 1, &ready_bit, 1);
-        ready_bit = ready_bit & 0x01;
-    } while(ready_bit & 0x01);
-}
-static void corespi_transfer_block
-(
-	struct spi_slave *slave,
-    const u8 * cmd_buffer,
-    u16 cmd_byte_size,
-    u8 * rx_buffer,
-    u16 rx_byte_size
-)
+
+static void corespi_transfer_block(struct spi_slave *slave,
+	   const u8 *cmd_buffer,u16 cmd_byte_size, u8 *rx_buffer, u16 rx_byte_size)
 {
     struct corespi_slave *cspi = to_corespi_slave(slave);
     u32 transfer_size = 0;   /* Total number of bytes to  transfer. */
@@ -277,7 +276,7 @@ static void corespi_transfer_block
 	/* Disable the Core SPI for a little bit, while we load the TX FIFO */
 	writeb(p_reg, &cspi->regs->crtl1);
 
-	while((tx_idx < transfer_size) && (tx_idx < 32))
+	while((tx_idx < transfer_size) && (tx_idx < FIFO_DEPTH))
 	{
 		if( tx_idx < cmd_byte_size )
 	    {
@@ -294,7 +293,7 @@ static void corespi_transfer_block
 	}
 
 	/* If room left to put last frame in before the off, then do it */
-	if((tx_idx == transfer_size) && (tx_idx < 32))
+	if((tx_idx == transfer_size) && (tx_idx < FIFO_DEPTH))
 	{
 		if( tx_idx < cmd_byte_size )
 		{
@@ -331,7 +330,7 @@ static void corespi_transfer_block
 
     while( tx_idx < cmd_byte_size )
 	{
-    	if( transit < 32 )
+    	if( transit < FIFO_DEPTH )
 		{
 		      /* Send another byte. */
 		   	if( tx_idx == transfer_size ) /* Last frame is special... */
@@ -360,7 +359,7 @@ static void corespi_transfer_block
      */
     while( transfer_idx < cmd_byte_size )
 	{
-    	if( transit < 32 )
+    	if( transit < FIFO_DEPTH )
 		{
     		if( tx_idx < transfer_size )
 		    {
@@ -383,7 +382,7 @@ static void corespi_transfer_block
      */
     while( tx_idx < transfer_size )
 	{
-    	if( transit < 32 )
+    	if( transit < FIFO_DEPTH )
 		{
     		writel(0x0, &cspi->regs->txdata);
 			++tx_idx;
@@ -401,7 +400,7 @@ static void corespi_transfer_block
     /* If we still need to send the last frame */
 	while( tx_idx == transfer_size )
 	{
-		if( transit < 32 )
+		if( transit < FIFO_DEPTH )
 		{
 			writel(0x0, &cspi->regs->txdata_last);
 			++tx_idx;

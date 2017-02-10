@@ -1,7 +1,7 @@
 /*
  * Microsemi CoreUARTabp
  *
- * Copyright (c) 2016 Microsemi Corporation
+ * Copyright (c) 2017 Microsemi Corporation
  * Written-by: Padmarao Begari <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier: GPL-2.0+
@@ -31,15 +31,15 @@ typedef struct msc_coreuart {
     u32 ctrl3;
 } msc_coreuart_t;
 
-#define DATA_8_BITS     0x01u
-#define NO_PARITY       0x00u
+#define DATA_8_BITS     	0x01
+#define NO_PARITY       	0x00
 
 #define BAUDVALUE_LSB       (0x00FF) 
 #define BAUDVALUE_MSB       (0xFF00) 
 #define BAUDVALUE_SHIFT     (5) 
 
-#define STATUS_RXFULL_MASK     0x02u
-#define STATUS_TXRDY_MASK     0x01u
+#define STATUS_RXFULL_MASK	0x02
+#define STATUS_TXRDY_MASK   0x01
 
 
 static void msc_serial_setbrg_internal(msc_coreuart_t *usart, int id,

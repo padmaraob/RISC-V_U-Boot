@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2016-17 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
@@ -7,6 +7,8 @@
 
 #include <common.h>
 #include <asm/io.h>
+
+/* timer without interrupts  */
 
 /* CoreTimer register footprint */
 typedef struct msc_coretimer {
@@ -38,6 +40,7 @@ int timer_init(void)
 	/* prescale = 83mhz/2 => 41.5Mhz */
 	writel(0, &tmr->timer_prescale); 
 	writel(TIMER_LOAD_VAL, &tmr->timer_load);
+
 	/* clear interrupts */
 	writel(0, &tmr->timer_intclr);
 
@@ -51,9 +54,7 @@ int timer_init(void)
 	return 0;
 }
 
-/* timer without interrupts  */
-
-/* reset time */
+/* reset timer */
 void reset_timer_masked(void)
 {
 	msc_coretimer_t *tmr = (msc_coretimer_t *)CONFIG_CORETIMER_BASE;
@@ -73,9 +74,7 @@ void reset_timer(void)
 	reset_timer_masked();
 }
 
-/*
- * return timer ticks
- */
+/* return timer ticks */
 ulong get_timer_masked(void)
 {
 	msc_coretimer_t *tmr = (msc_coretimer_t *)CONFIG_CORETIMER_BASE;

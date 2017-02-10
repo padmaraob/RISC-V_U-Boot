@@ -1,7 +1,7 @@
 /*
  *  linux/include/asm-arm/byteorder.h
  *
- * Copyright (c) 2016 Microsemi Corporation.
+ * Copyright (c) 2017 Microsemi Corporation.
  * Padmarao Begari, Microsemi Corporation <padmarao.begari@microsemi.com>
  *
  * ARM Endian-ness.  In little endian mode, the data bus is connected such

@@ -728,13 +728,15 @@ else
 BOARD_SIZE_CHECK =
 endif
 
-# Statically apply RELA-style relocations (currently arm64 only)
+# Statically apply RELA-style relocations (currently arm64 only, riscv)
+# added 'dymsym_start' for riscv		
 ifneq ($(CONFIG_STATIC_RELA),)
 # $(1) is u-boot ELF, $(2) is u-boot bin, $(3) is text base
 DO_STATIC_RELA = \
 	start=$$($(NM) $(1) | grep __rel_dyn_start | cut -f 1 -d ' '); \
 	end=$$($(NM) $(1) | grep __rel_dyn_end | cut -f 1 -d ' '); \
-	tools/relocate-rela $(2) $(3) $$start $$end
+	dymsym_start=$$($(NM) $(1) | grep __dyn_sym_start | cut -f 1 -d ' ');\
+	tools/relocate-rela $(2) $(3) $$start $$end $$dymsym_start
 else
 DO_STATIC_RELA =
 endif
@@ -1178,7 +1180,7 @@ u-boot.elf: u-boot.bin
 	@$(LD) u-boot-elf.o -o $@ \
 		--defsym=_start=$(CONFIG_SYS_TEXT_BASE) \
 		-Ttext=$(CONFIG_SYS_TEXT_BASE)
-
+				
 # Rule to link u-boot
 # May be overridden by arch/$(ARCH)/config.mk
 quiet_cmd_u-boot__ ?= LD      $@
@@ -1388,7 +1390,7 @@ checkarmreloc: u-boot
 		echo "$< contains unexpected relocations: $$RELOC"; \
 		false; \
 	fi
-
+	
 env: scripts_basic
 	$(Q)$(MAKE) $(build)=tools/$@
 

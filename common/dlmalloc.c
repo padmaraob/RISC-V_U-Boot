@@ -1077,8 +1077,7 @@ static void malloc_extend_top(nb) INTERNAL_SIZE_T nb;
 
   /* Pad request with top_pad plus minimal overhead */
 
- /* INTERNAL_SIZE_T    sbrk_size     = nb + top_pad + MINSIZE;*/
-    INTERNAL_SIZE_T    sbrk_size     = nb + 0 + MINSIZE;
+  INTERNAL_SIZE_T    sbrk_size     = nb + top_pad + MINSIZE;
   unsigned long pagesz    = malloc_getpagesize;
 
   /* If not the first time through, round to preserve page boundary */
