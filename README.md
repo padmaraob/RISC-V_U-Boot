@@ -5,16 +5,18 @@ This repository contains the U-Boot created by Microsemi for RISC-V core on Smar
 
 ### RISC-V cross tools
 
-Get the RISC-V cross tool from [sifive github](https://github.com/sifive/freedom-e-sdk.git) and follow the README file for installation.
+Get the RISC-V cross tool from [riscv github](https://github.com/riscv/riscv-gnu-toolchain) and follow the README file for installation.
 
-        git clone --recursive https://github.com/sifive/freedom-e-sdk.git
+        $ git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 
-After clone of freedom-e-sdk, edit the `make` file for `riscv32-unknown-linux-gnu-gcc` like below
+After clone of riscv-gnu-toolchain
 
-        $(toolchain_dest)/bin/$(target32)-gcc: $(toolchain_srcdir)
-		      mkdir -p $(toolchain32_wrkdir)
-		      cd $(toolchain32_wrkdir); $(toolchain_srcdir)/configure --prefix=$(toolchain_dest) --with-arch=RV32IMA
-		      $(MAKE) linux -C $(toolchain32_wrkdir)
+	$ cd riscv-gnu-toolchain
+
+To build the 32-bit rv32 toolchain, use:
+
+        $./configure --prefix={Installation directory} --with-arch=rv32imac --with-abi=ilp32
+	$ make linux
 
 ### Getting U-Boot sources
 
